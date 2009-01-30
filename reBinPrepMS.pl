@@ -7,7 +7,7 @@
 #Copyright 2008
 
 #These variables (in main) are used by getVersion() and usage()
-my $software_version_number = '1.0';
+my $software_version_number = '1.1';
 my $created_on_date         = '1/21/2009';
 
 ##
@@ -244,6 +244,12 @@ foreach my $input_file (@input_files)
 	    #Figure out which indexes to print: this returns an array or arrays
 	    #of indexes to the @mzs array
 	    $indexes_to_print = mergeClose(\@mzs,$mz_window_play);
+
+	    unless($noheader)
+	      {
+		print("\n#",scalar(@mzs)," m/z's reduced to ",
+		      scalar(@$indexes_to_print)," bins.\n\n");
+	      }
 
 	    printHeader(\@mzs,$indexes_to_print);
 	  }
