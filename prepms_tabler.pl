@@ -7,7 +7,7 @@
 #Copyright 2008
 
 #These variables (in main) are used by getVersion() and usage()
-my $software_version_number = '1.0';
+my $software_version_number = '1.1';
 my $created_on_date         = '12/9/2008';
 
 ##
@@ -29,6 +29,7 @@ my $help                = 0;
 my $version             = 0;
 my $overwrite           = 0;
 my $noheader            = 0;
+my $windows_compatible  = 0;
 my($preprocessed_file,$mz_file,$peaks_file);
 
 #These variables (in main) are used by the following subroutines:
@@ -66,7 +67,10 @@ my $GetOptHash =
    'help|?'             => \$help,                   #OPTIONAL [Off]
    'version'            => \$version,                #OPTIONAL [Off]
    'noheader'           => \$noheader,               #OPTIONAL [Off]
+   'windows-compatible!'=> \$windows_compatible      #OPTIONAL [Off]
   };
+
+my $nl = ($windows_compatible ? "\r" : "\n");
 
 #If there are no arguments and no files directed or piped in
 if(scalar(@ARGV) == 0 && isStandardInputFromTerminal())
@@ -101,7 +105,7 @@ if($help)
 #If the user has asked for the software version, print it
 if($version)
   {
-    print(getVersion($verbose),"\n");
+    print(getVersion($verbose),$nl);
     quit(0);
   }
 
@@ -494,12 +498,12 @@ foreach my $input_file (@input_files)
 
 	    #Store info. about the run as a comment at the top of the output
 	    #file
-	    print OIBTF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-			 '#',scalar(localtime($^T)),"\n",
-			 '#',$ENV{CWD} || $ENV{PWD},"\n",
-			 '#',getCommand(1),"\n") unless($noheader);
+	    print OIBTF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+			 '#',scalar(localtime($^T)),$nl,
+			 '#',$ENV{CWD} || $ENV{PWD},$nl,
+			 '#',getCommand(1),$nl) unless($noheader);
 
-	    print OIBTF (map {"$_\t$preprocessed->[$sample_index]->{$_}\n"}
+	    print OIBTF (map {"$_\t$preprocessed->[$sample_index]->{$_}$nl"}
 			 sort {$a <=> $b}
 			 keys(%{$preprocessed->[$sample_index]}));
 
@@ -525,12 +529,12 @@ foreach my $input_file (@input_files)
 
 	    #Store info. about the run as a comment at the top of the output
 	    #file
-	    print OINPF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-			 '#',scalar(localtime($^T)),"\n",
-			 '#',$ENV{CWD} || $ENV{PWD},"\n",
-			 '#',getCommand(1),"\n") unless($noheader);
+	    print OINPF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+			 '#',scalar(localtime($^T)),$nl,
+			 '#',$ENV{CWD} || $ENV{PWD},$nl,
+			 '#',getCommand(1),$nl) unless($noheader);
 
-	    print OINPF (map {"$mzs[$_]\t$peaks->[$sample_index]->[$_]\n"}
+	    print OINPF (map {"$mzs[$_]\t$peaks->[$sample_index]->[$_]$nl"}
 			 (0..(scalar(@mzs) - 1)));
 
 	    #Close the output file handle
@@ -555,13 +559,13 @@ foreach my $input_file (@input_files)
 
 	    #Store info. about the run as a comment at the top of the output
 	    #file
-	    print OIBPF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-			 '#',scalar(localtime($^T)),"\n",
-			 '#',$ENV{CWD} || $ENV{PWD},"\n",
-			 '#',getCommand(1),"\n") unless($noheader);
+	    print OIBPF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+			 '#',scalar(localtime($^T)),$nl,
+			 '#',$ENV{CWD} || $ENV{PWD},$nl,
+			 '#',getCommand(1),$nl) unless($noheader);
 
 	    print OIBPF
-	      (map {"$mzs[$_]\t$preprocessed->[$sample_index]->{$mzs[$_]}\n"}
+	      (map {"$mzs[$_]\t$preprocessed->[$sample_index]->{$mzs[$_]}$nl"}
 	       (0..(scalar(@mzs) - 1)));
 
 	    #Close the output file handle
@@ -604,18 +608,18 @@ if($output_norm_peak_table)
 	verbose("[$output_norm_peak_table_file] Opened output file.");
 
 	  #Store info. about the run as a comment at the top of the output file
-	  print ONPTF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-		       '#',scalar(localtime($^T)),"\n",
-		       '#',$ENV{CWD} || $ENV{PWD},"\n",
-		       '#',getCommand(1),"\n") unless($noheader);
+	  print ONPTF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+		       '#',scalar(localtime($^T)),$nl,
+		       '#',$ENV{CWD} || $ENV{PWD},$nl,
+		       '#',getCommand(1),$nl) unless($noheader);
 
-	print ONPTF ("\t",join("\t",@mzs),"\n");
+	print ONPTF ("\t",join("\t",@mzs),$nl);
 	my $file_index = 0;
 	foreach my $sample_array (@$peaks)
 	  {
 	    print ONPTF ("$input_files[$file_index]\t",
 			 join("\t",@$sample_array),
-			 "\n");
+			 $nl);
 	    $file_index++;
 	  }
 
@@ -639,18 +643,18 @@ if($output_blr_peak_table)
 	verbose("[$output_blr_peak_table_file] Opened output file.");
 
 	#Store info. about the run as a comment at the top of the output file
-	print OBPTF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-		     '#',scalar(localtime($^T)),"\n",
-		     '#',$ENV{CWD} || $ENV{PWD},"\n",
-		     '#',getCommand(1),"\n") unless($noheader);
+	print OBPTF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+		     '#',scalar(localtime($^T)),$nl,
+		     '#',$ENV{CWD} || $ENV{PWD},$nl,
+		     '#',getCommand(1),$nl) unless($noheader);
 
-	print OBPTF ("\t",join("\t",@mzs),"\n");
+	print OBPTF ("\t",join("\t",@mzs),$nl);
 	my $file_index = 0;
 	foreach my $sample_hash (@$preprocessed)
 	  {
 	    print OBPTF ("$input_files[$file_index]\t",
 			 join("\t",map {$sample_hash->{$_}} @mzs),
-			 "\n");
+			 $nl);
 	    $file_index++;
 	  }
 
@@ -674,16 +678,16 @@ if($output_gnuplot_commands)
       {verbose("[$output_gnuplot_commands_file] Opened output file.")}
 
     #Store info. about the run as a comment at the top of the output file
-    print OGCF ('#',join("\n#",split(/\n/,getVersion())),"\n",
-		'#',scalar(localtime($^T)),"\n",
-		'#',$ENV{CWD} || $ENV{PWD},"\n",
-		'#',getCommand(1),"\n") unless($noheader);
+    print OGCF ('#',join("$nl#",split(/\n|\r/,getVersion())),$nl,
+		'#',scalar(localtime($^T)),$nl,
+		'#',$ENV{CWD} || $ENV{PWD},$nl,
+		'#',getCommand(1),$nl) unless($noheader);
 
     print OGCF ("plot ",
 		join(", ",
 		     map {"\"$preprocessed_file\" using 1:$_ with lines 1"}
 		     (2..($num_samps + 1))),
-	        "\n");
+	        $nl);
 
     #Close the output file handle
     close(OGCF);
@@ -971,6 +975,9 @@ end_print
                                    and command-line information will be printed
                                    at the top of all output files commented
                                    with '#' characters.
+     --windows-compatible OPTIONAL [Off] This flag will cause the script to
+                                   output carriage returns instead of newline
+                                   characters.
 
 end_print
       }
