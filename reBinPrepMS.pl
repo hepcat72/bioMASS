@@ -7,7 +7,7 @@
 #Copyright 2008
 
 #These variables (in main) are used by getVersion() and usage()
-my $software_version_number = '1.1';
+my $software_version_number = '1.2';
 my $created_on_date         = '1/21/2009';
 
 ##
@@ -25,6 +25,7 @@ my $help                = 0;
 my $version             = 0;
 my $overwrite           = 0;
 my $noheader            = 0;
+my $windows_compatible  = 0;
 my $mz_window_ratio     = 0.001; #0.1%
 
 #These variables (in main) are used by the following subroutines:
@@ -50,7 +51,10 @@ my $GetOptHash =
    'help|?'             => \$help,                   #OPTIONAL [Off]
    'version'            => \$version,                #OPTIONAL [Off]
    'noheader'           => \$noheader,               #OPTIONAL [Off]
+   'windows-compatible!'=> \$windows_compatible      #OPTIONAL [Off]
   };
+
+my $nl = ($windows_compatible ? "\r" : "\n");
 
 if($mz_window_ratio !~ /0*\.0*[1-9]\d*$/)
   {
@@ -93,7 +97,7 @@ if($help)
 #If the user has asked for the software version, print it
 if($version)
   {
-    print(getVersion($verbose),"\n");
+    print(getVersion($verbose),$nl);
     quit(0);
   }
 
@@ -162,9 +166,9 @@ verbose('[STDOUT] Opened for all output.') if(!defined($outfile_suffix));
 #Store info. about the run as a comment at the top of the output file if
 #STDOUT has been redirected to a file
 if(!isStandardOutputToTerminal() && !$noheader)
-  {print('#',getVersion(),"\n",
-	 '#',scalar(localtime($^T)),"\n",
-	 '#',getCommand(1),"\n");}
+  {print('#',getVersion(),$nl,
+	 '#',scalar(localtime($^T)),$nl,
+	 '#',getCommand(1),$nl);}
 
 #For each input file
 foreach my $input_file (@input_files)
@@ -194,9 +198,9 @@ foreach my $input_file (@input_files)
 	select(OUTPUT);
 
 	#Store info. about the run as a comment at the top of the output file
-	print('#',getVersion(),"\n",
-	      '#',scalar(localtime($^T)),"\n",
-	      '#',getCommand(1),"\n") unless($noheader);
+	print('#',getVersion(),$nl,
+	      '#',scalar(localtime($^T)),$nl,
+	      '#',getCommand(1),$nl) unless($noheader);
       }
 
     #Open the input file
@@ -227,7 +231,7 @@ foreach my $input_file (@input_files)
 
 	if(/^\s*$/ || /\s*#/)
 	  {
-	    print;
+	    print unless($noheader);
 	    next;
 	  }
 
@@ -247,8 +251,8 @@ foreach my $input_file (@input_files)
 
 	    unless($noheader)
 	      {
-		print("\n#",scalar(@mzs)," m/z's reduced to ",
-		      scalar(@$indexes_to_print)," bins.\n\n");
+		print("$nl#",scalar(@mzs)," m/z's reduced to ",
+		      scalar(@$indexes_to_print)," bins.$nl$nl");
 	      }
 
 	    printHeader(\@mzs,$indexes_to_print);
@@ -391,7 +395,7 @@ sub printRow
 	error("There are [$row_size] column headers, but a row was ",
 	      "encountered with [",scalar(@$row),
 	      "] columns: [@$row ].  Skipping.");
-	print("\tError: wrong number of columns.\n");
+	print("\tError: wrong number of columns.$nl");
 	return();
       }
 
@@ -402,7 +406,7 @@ sub printRow
 	print("\t$largest");
       }
 
-    print("\n");
+    print($nl);
   }
 
 
@@ -422,7 +426,7 @@ sub printHeader
 	print("\t$ave");
       }
 
-    print("\n");
+    print($nl);
   }
 
 
@@ -690,7 +694,12 @@ end_print
                                    this option, the script version, date/time,
                                    and command-line information will be printed
                                    at the top of all output files commented
-                                   with '#' characters.
+                                   with '#' characters.  Note that with this
+                                   option, commented lines in the input file
+                                   will not pipe through to the output file.
+     --windows-compatible OPTIONAL [Off] This flag will cause the script to
+                                   output carriage returns instead of newline
+                                   characters.
 
 end_print
       }
