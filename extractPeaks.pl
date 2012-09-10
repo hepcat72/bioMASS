@@ -1400,7 +1400,7 @@ sub help
     print << "end_print";
 
 $script
-Copyright 2007
+Provided by GNU GPL
 Robert W. Leach
 Created on 8/14/2008
 Last Modified on $lmd
