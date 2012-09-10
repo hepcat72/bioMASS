@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-#binMSW.pl  (Bins MassSpecWavelet data produced by Dongliang's R script)
+#binMSW.pl  (Bins MassSpecWavelet data)
 #Generated using perl_script_template.pl 1.31
 #Robert W. Leach
 #rwleach@ccr.buffalo.edu
